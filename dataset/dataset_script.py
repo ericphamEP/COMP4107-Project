@@ -5,18 +5,20 @@ import numpy as np
 import pandas as pd
 from datasets import load_dataset
 from PIL import Image
+import time
+start = time.time()
 
 OUTPUT_DIR = 'H:\Downloads\School\Year5\comp4107\project\\test\\test_dataset'
 TRAIN_PATH = path.join(OUTPUT_DIR, 'train')
 VAL_PATH = path.join(OUTPUT_DIR, 'validation')
 TEST_PATH = path.join(OUTPUT_DIR, 'test')
 
-TRAIN_SIZE = 3
+'''TRAIN_SIZE = 3
 VAL_SIZE = 2
-TEST_SIZE = 5
-'''TRAIN_SIZE = 1000
-VAL_SIZE = 200
-TEST_SIZE = 1200'''
+TEST_SIZE = 5'''
+TRAIN_SIZE = 500
+VAL_SIZE = 100
+TEST_SIZE = 600
 
 '''
 Output File Structure
@@ -108,4 +110,8 @@ loadDataAI(dataset.skip(TRAIN_SIZE+VAL_SIZE), TEST_SIZE, path.join(TEST_PATH, 'a
 
 # download midjourney?
 
+
 # download DALL-E?
+
+
+print('Took', time.time()-start, 'seconds.')
