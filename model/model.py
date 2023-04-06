@@ -99,13 +99,13 @@ class ImageDataGenerator(tf.keras.utils.Sequence):
 
       # Preprocessing
       if self.preprocess == 'edge':
-        edge_mag, edge_ori = preprocessing.edge_mag_ori(image_array, 4)
+        edge_mag, edge_ori = preprocessing.edge_mag_ori(image_array, 1)
         image_array = edge_mag
       elif self.preprocess == 'orient':
-        edge_mag, edge_ori = preprocessing.edge_mag_ori(image_array, 4)
+        edge_mag, edge_ori = preprocessing.edge_mag_ori(image_array, 1)
         image_array = edge_ori
       elif self.preprocess == 'corner':
-        pass
+        image_array = preprocessing.corner_detect(image_array)
 
       image_array = np.expand_dims(np.asarray(image), axis=0)
 
@@ -142,9 +142,11 @@ def ai_image_detector_model(training_data_path, val_data_path, preprocess):
     keras.layers.MaxPooling2D(pool_size=2),
     keras.layers.Conv2D(filters=64, kernel_size=3, activation='sigmoid'),
     keras.layers.Flatten(),
-    keras.layers.Dense(64, activation="relu"),
+    keras.layers.Dense(64, activation="sigmoid"),
     keras.layers.Dense(1, activation="sigmoid")
   ])
+
+  print(model.summary())
 
   optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
   model.compile(loss="binary_crossentropy", optimizer=optimizer, metrics=["accuracy"])

@@ -16,9 +16,9 @@ TEST_PATH = path.join(OUTPUT_DIR, 'test')
 '''TRAIN_SIZE = 3
 VAL_SIZE = 2
 TEST_SIZE = 5'''
-TRAIN_SIZE = 500
-VAL_SIZE = 100
-TEST_SIZE = 600
+TRAIN_SIZE = 5000
+VAL_SIZE = 1000
+TEST_SIZE = 6000
 
 '''
 Output File Structure

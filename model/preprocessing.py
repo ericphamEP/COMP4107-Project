@@ -226,3 +226,13 @@ def reflect_pad(img: np.ndarray, pad_w: int, pad_h: int) -> np.ndarray:
         padded = reflect_pad(padded, extra_w, extra_h)
 
     return padded
+
+
+def corner_detect(img):
+    # Corner detection
+    threshold_max = 1
+    thresh = 0.01
+    minEigenVals = cv.cornerMinEigenVal(img, 5)
+
+    threshVal, threshImg = cv.threshold(minEigenVals, thresh, threshold_max, cv.THRESH_TOZERO)
+    return 255*threshImg
