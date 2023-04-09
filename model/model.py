@@ -90,6 +90,16 @@ class ImageDataGenerator(tf.keras.utils.Sequence):
         image_filename = os.path.join(self.ai_directory, file_name)
     
       image = Image.open(image_filename).resize((IMAGE_WIDTH, IMAGE_HEIGHT))
+
+      # temp: crop image to center 64x64 size
+      '''image = Image.open(image_filename)
+      width, height = image.size
+      left = (width - IMAGE_WIDTH)/2
+      top = (height - IMAGE_HEIGHT)/2
+      right = (width + IMAGE_WIDTH)/2
+      bottom = (height + IMAGE_HEIGHT)/2
+      image = image.crop((left, top, right, bottom))'''
+
       if self.preprocess is False and image.mode != 'RGB':
         image = image.convert('RGB')
       elif self.preprocess is not False:
@@ -116,6 +126,9 @@ class ImageDataGenerator(tf.keras.utils.Sequence):
         x = np.vstack((x, image_array))
         y = np.vstack((y, label))
 
+    # Normalize each feature
+    x = (x - x.mean(axis=(0,1,2), keepdims=True)) / x.std(axis=(0,1,2), keepdims=True)
+
     # x is one batch of data
     # y is the same batch of data
     return x, y
@@ -138,11 +151,11 @@ def ai_image_detector_model(training_data_path, val_data_path, preprocess):
     keras.layers.InputLayer(input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, numChannels)),
     keras.layers.Conv2D(filters=32, kernel_size=3, activation='sigmoid'),
     keras.layers.MaxPooling2D(pool_size=2),
-    keras.layers.Conv2D(filters=64, kernel_size=3, activation='sigmoid'),
+    keras.layers.Conv2D(filters=64, kernel_size=3, activation='relu'),
     keras.layers.MaxPooling2D(pool_size=2),
-    keras.layers.Conv2D(filters=64, kernel_size=3, activation='sigmoid'),
+    keras.layers.Conv2D(filters=64, kernel_size=3, activation='relu'),
     keras.layers.Flatten(),
-    keras.layers.Dense(64, activation="sigmoid"),
+    keras.layers.Dense(64, activation="relu"),
     keras.layers.Dense(1, activation="sigmoid")
   ])
 
@@ -167,35 +180,7 @@ if __name__ == '__main__':
   dataset_val_fullpath = r"H:\Downloads\School\Year5\comp4107\project\test\test_dataset\validation"
   dataset_test_fullpath = r"H:\Downloads\School\Year5\comp4107\project\test\test_dataset\test"
   #preprocess = False
-  preprocess = 'edge' # Can be: False, 'edge', 'orient', or 'corner'
-
-  # Data gen
-  '''datagen = ImageDataGenerator(dataset_test_fullpath, batch_size=100)
-  print(datagen.__len__())
-  batch_1 = datagen.__getitem__(0)
-  print("batch 1:", batch_1[0].shape, batch_1[1].shape)
-  batch_2 = datagen.__getitem__(1)
-  print("batch 2:", batch_2[0].shape, batch_2[1].shape)
-  batch_3 = datagen.__getitem__(2)
-  print("batch 3:", batch_3[0].shape, batch_3[1].shape)
-  batch_4 = datagen.__getitem__(3)
-  print("batch 4:", batch_4[0].shape, batch_4[1].shape)
-  batch_5 = datagen.__getitem__(4)
-  print("batch 5:", batch_5[0].shape, batch_5[1].shape)
-  batch_6 = datagen.__getitem__(5)
-  print("batch 6:", batch_6[0].shape, batch_6[1].shape)
-  batch_7 = datagen.__getitem__(6)
-  print("batch 7:", batch_7[0].shape, batch_7[1].shape)
-  batch_8 = datagen.__getitem__(7)
-  print("batch 8:", batch_8[0].shape, batch_8[1].shape)
-  batch_9 = datagen.__getitem__(8)
-  print("batch 9:", batch_9[0].shape, batch_9[1].shape)
-  batch_10 = datagen.__getitem__(9)
-  print("batch 10:", batch_10[0].shape, batch_10[1].shape)
-  batch_11 = datagen.__getitem__(10)
-  print("batch 11:", batch_11[0].shape, batch_11[1].shape)
-  batch_12 = datagen.__getitem__(11)
-  print("batch 12:", batch_12[0].shape, batch_12[1].shape)'''
+  preprocess = 'corner' # Can be: False, 'edge', 'orient', or 'corner'
 
   # Model
   model, training_performance, validation_performance = ai_image_detector_model(dataset_train_fullpath, dataset_val_fullpath, preprocess)
@@ -205,3 +190,67 @@ if __name__ == '__main__':
   test_generator = ImageDataGenerator(dataset_test_fullpath, preprocess=preprocess)
   test_performance = model.evaluate(x=test_generator)
   print("CNN Test loss:", test_performance)
+
+
+
+  # Todo: test using y_prob = model.predict(x) 
+  print("test predictions")
+  non_ai_directory = os.path.join(dataset_test_fullpath, 'non_ai')
+  ai_directory = os.path.join(dataset_test_fullpath, 'ai')
+  batch_ids = []
+
+  # Add non-AI image ID and label 0
+  for name in os.listdir(non_ai_directory):
+    if os.path.isfile(os.path.join(non_ai_directory, name)):
+      batch_ids.append((name, 0))
+
+  # Add AI image ID and label 1
+  for name in os.listdir(ai_directory):
+    if os.path.isfile(os.path.join(ai_directory, name)):
+      batch_ids.append((name, 1))
+  #batch_ids = [("non_ai_1.jpg", 0), ("non_ai_2.jpg", 0), ("ai_1.png", 1)]
+
+  x = None
+  y = None
+  for file_name, label in batch_ids:
+    
+    if label == 0: # non-AI image
+      image_filename = os.path.join(non_ai_directory, file_name)
+    else: # AI image
+      image_filename = os.path.join(ai_directory, file_name)
+  
+    image = Image.open(image_filename).resize((IMAGE_WIDTH, IMAGE_HEIGHT))
+
+    '''# temp: crop image to center 64x64 size
+    image = Image.open(image_filename)
+    width, height = image.size
+    left = (width - IMAGE_WIDTH)/2
+    top = (height - IMAGE_HEIGHT)/2
+    right = (width + IMAGE_WIDTH)/2
+    bottom = (height + IMAGE_HEIGHT)/2
+    image = image.crop((left, top, right, bottom))'''
+
+    image = image.convert("L")
+
+    image_array = np.asarray(image)
+
+    # Preprocessing
+    image_array = preprocessing.corner_detect(image_array)
+
+    image_array = np.expand_dims(np.asarray(image), axis=0)
+
+    if x is None:
+      x = image_array
+      y = label
+    else:
+      x = np.vstack((x, image_array))
+      y = np.vstack((y, label))
+
+  # Normalize each feature
+  x = (x - x.mean(axis=(0,1,2), keepdims=True)) / x.std(axis=(0,1,2), keepdims=True)
+  
+  
+  y_prob = model.predict(x)
+  print(y_prob)
+  for i in range(int(13*len(batch_ids)/24)):
+    print(batch_ids[i], ': prob', y_prob[i])
