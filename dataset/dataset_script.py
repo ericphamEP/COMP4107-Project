@@ -16,6 +16,7 @@ TEST_PATH = path.join(OUTPUT_DIR, 'test')
 '''TRAIN_SIZE = 3
 VAL_SIZE = 2
 TEST_SIZE = 5'''
+
 TRAIN_SIZE = 5000
 VAL_SIZE = 1000
 TEST_SIZE = 6000
@@ -94,7 +95,6 @@ os.makedirs(path.join(TEST_PATH, 'ai'), exist_ok=True)
 
 
 # non-ai art
-
 dataset = load_dataset('laion/laion-art', split='train', streaming=True)
 loadDataNonAI(dataset, TRAIN_SIZE, path.join(TRAIN_PATH, 'non_ai'), 'non_ai')
 loadDataNonAI(dataset.skip(TRAIN_SIZE), VAL_SIZE, path.join(VAL_PATH, 'non_ai'), 'non_ai')

@@ -12,4 +12,4 @@ Python script can train a 2D convolutional neural network Keras model on the gen
 
 ## Development
 
-These source files use Python and various libraries such as Numpy, pandas, Pillow, and TensorFlow. Some preprocessing options use OpenCV.
+These source files use Python and various libraries such as Numpy, pandas, Pillow, and TensorFlow. Some preprocessing options also use OpenCV.
