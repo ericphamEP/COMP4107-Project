@@ -1,6 +1,6 @@
-# AI-generated image detector, COMP4107-Project
+# AI-generated image detector
 
-This project has several parts for creating an AI-generated image detector, that were used to experiment and report on model parameters that increased model effectiveness and accuracy.
+This school project has several parts for creating an AI-generated image detector, that were used to experiment and report on model parameters that increased model effectiveness and accuracy.
 
 ## Dataset generator
 
@@ -8,4 +8,8 @@ Python script generates a local custom-format dataset that pulls from various so
 
 ## Model generator
 
-Python script can train a 2D convolutional neural network on the generated dataset, with the optional help of different available pre-processing techniques such as edge detection and corner detection.
+Python script can train a 2D convolutional neural network Keras model on the generated dataset, with the optional help of different available pre-processing techniques such as edge detection and corner detection.
+
+## Development
+
+These source files use Python and various libraries such as Numpy, pandas, Pillow, and TensorFlow.
